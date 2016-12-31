@@ -47,6 +47,25 @@ class User(Base):
   def __repr__(self):
     return "<User(username='%s')>" % (self.username)
 
+class Result(Base):
+  """Result of a user performing a workout"""
+  __tablename__ = 'results'
+
+  id = Column(Integer, Sequence('result_id_seq'), primary_key=True)
+  workout_id = Column(Integer, ForeignKey('workouts.id'))
+  workout = relationship("Workout")
+  user_id = Column(Integer, ForeignKey('users.id'))
+  user = relationship("User")
+  gender = Column(String)
+  age = Column(Integer)
+  height = Column(String)
+  weight = Column(Integer)
+  result = Column(Integer)
+  units = Column(String)
+
+  def __repr__(self):
+    return "<Result('%d %s')>" % (self.result, self.units)
+
 ### Insert at end of file ###
 engine = create_engine('sqlite:///workouts.db', echo=False)
 Base.metadata.create_all(engine)
