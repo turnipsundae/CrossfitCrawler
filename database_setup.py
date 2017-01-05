@@ -67,6 +67,8 @@ class Result(Base):
   def __repr__(self):
     return "<Result('%d %s')>" % (self.result, self.units)
 
+# To drop a table, User.__table__.drop(engine)
+
 ### Insert at end of file ###
 engine = create_engine('sqlite:///workouts.db', echo=False)
 Base.metadata.create_all(engine)

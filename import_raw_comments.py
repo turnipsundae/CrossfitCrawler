@@ -8,21 +8,6 @@ def setup_session():
     session = Session()
     return session
 
-def scrub(session):
-    raw_results = []
-    results = []
-    rx = session.query(Comment).filter(Comment.text.like(r"%rx%"))
-    for r in rx:
-        t = GENDER_RE.findall(r.text)
-        if t:
-            gender = t[0][1]
-            age = AGE_RE.findall(t[0][2])
-            height = HEIGHT_RE.findall(t[0][2])
-            weight = WEIGHT_RE.findall(t[0][2])
-            raw_results.append(t[0])
-            results.append([r.text, gender, age, height, weight])
-    return (raw_results, results)
-
 def convert_to_ft_in(height_param):
     # height_param is a tuple inside an array
     # 
@@ -54,6 +39,35 @@ def convert_to_lbs(weight_param):
             return (int(kgs.split('.')[0]) * LB_PER_KG)
         else:
             return int(lbs.split('.')[0])
+
+def scrub(session):
+    raw_results = []
+    results = []
+    rx = session.query(Comment).filter(Comment.text.like(r"%rx%"))
+    for r in rx:
+        t = GENDER_RE.findall(r.text)
+        if t:
+            gender = t[0][1]
+            age = AGE_RE.findall(t[0][2])
+            height = HEIGHT_RE.findall(t[0][2])
+            weight = WEIGHT_RE.findall(t[0][2])
+            raw_results.append(t[0])
+            # results.append([r.text, gender, age, height, weight, r.id, r.user_id, r.workout_id])
+            result = Result(workout_id = r.workout_id,
+                            user_id = r.user_id,
+                            gender = gender,
+                            age = age,
+                            height = convert_to_ft_in(height),
+                            weight = convert_to_lbs(weight),
+                            result = 0,
+                            units = "TBD",
+                            mods = "TBD")
+            results.append(result)
+    return (raw_results, results)
+
+def comments_to_results():
+    session = setup_session()
+    raw_results, results = scrub(session)
 
 # for i in range(6,16):
 #     print (results[i][0])
