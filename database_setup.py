@@ -62,6 +62,7 @@ class Result(Base):
   weight = Column(Integer)
   result = Column(Integer)
   units = Column(String)
+  mods = Column(String)
 
   def __repr__(self):
     return "<Result('%d %s')>" % (self.result, self.units)
