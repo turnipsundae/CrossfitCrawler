@@ -18,10 +18,10 @@ class Workout(Base):
   title = Column(String)
   description = Column(String)
   comments = relationship("Comment")
+  results = relationship("Result")
 
   def __repr__(self):
     return "<Workout(title='%s', description='%s')>" % (self.title, self.description)
-
 
 class Comment(Base):
   """Comments for each workout."""
@@ -33,6 +33,7 @@ class Comment(Base):
   workout = relationship("Workout")
   user_id = Column(Integer, ForeignKey('users.id'))
   user = relationship("User")
+  result = relationship("Result")
 
   def __repr__(self):
     return "<Comment(text='%s')>" % (self.text)
@@ -54,6 +55,8 @@ class Result(Base):
   id = Column(Integer, Sequence('result_id_seq'), primary_key=True)
   workout_id = Column(Integer, ForeignKey('workouts.id'))
   workout = relationship("Workout")
+  comment_id = Column(Integer, ForeignKey('comments.id'))
+  comment = relationship("Comment")
   user_id = Column(Integer, ForeignKey('users.id'))
   user = relationship("User")
   gender = Column(String)

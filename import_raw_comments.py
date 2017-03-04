@@ -1,7 +1,7 @@
 from database_setup import Workout, Comment, User, Result, engine
 from sqlalchemy.orm import sessionmaker
 
-from util import GENDER_RE, AGE_RE, HEIGHT_RE, WEIGHT_RE 
+from util import GENDER_RE, AGE_RE, HEIGHT_RE, WEIGHT_RE, UNITS_RE
 
 def setup_session():    
     Session = sessionmaker(bind=engine)
@@ -49,25 +49,36 @@ def scrub(session):
         if t:
             gender = t[0][1]
             age = AGE_RE.findall(t[0][2])
+            if age:
+                age = age[0]
+            else:
+                age = None
             height = HEIGHT_RE.findall(t[0][2])
+            # height = convert_to_ft_in(height)
             weight = WEIGHT_RE.findall(t[0][2])
+            # weight = convert_to_lbs(weight)
             raw_results.append(t[0])
-            # results.append([r.text, gender, age, height, weight, r.id, r.user_id, r.workout_id])
+            units = UNITS_RE.findall(str(r.workout))
+            if units:
+                units = units[0]
+            else:
+                units = None
+            
             result = Result(workout_id = r.workout_id,
+                            comment_id = r.id,
                             user_id = r.user_id,
                             gender = gender,
                             age = age,
-                            height = convert_to_ft_in(height),
+                            height = str(convert_to_ft_in(height)),
                             weight = convert_to_lbs(weight),
                             result = 0,
-                            units = "TBD",
-                            mods = "TBD")
+                            units = units,
+                            mods = "Rx")
             results.append(result)
     return (raw_results, results)
 
-def comments_to_results():
-    session = setup_session()
-    raw_results, results = scrub(session)
+def add_results_to_db(results, session):
+    session.bulk_save_objects(results)
 
 # for i in range(6,16):
 #     print (results[i][0])
