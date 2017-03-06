@@ -63,12 +63,13 @@ class Result(Base):
   age = Column(Integer)
   height = Column(String)
   weight = Column(Integer)
-  result = Column(Integer)
+  result = Column(String)
+  score = Column(Integer)
   units = Column(String)
   mods = Column(String)
 
   def __repr__(self):
-    return "<Result('%d %s')>" % (self.result, self.units)
+    return "<Result('%s %s')>" % (self.result, self.units)
 
 # To drop a table, User.__table__.drop(engine)
 

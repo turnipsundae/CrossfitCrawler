@@ -1,7 +1,7 @@
 from database_setup import Workout, Comment, User, Result, engine
 from sqlalchemy.orm import sessionmaker
 
-from util import GENDER_RE, AGE_RE, HEIGHT_RE, WEIGHT_RE, UNITS_RE
+from util import GENDER_RE, AGE_RE, HEIGHT_RE, WEIGHT_RE, UNITS_RE, RESULTS_RE
 
 def setup_session():    
     Session = sessionmaker(bind=engine)
@@ -58,6 +58,9 @@ def scrub(session):
             weight = WEIGHT_RE.findall(t[0][2])
             # weight = convert_to_lbs(weight)
             raw_results.append(t[0])
+            res = RESULTS_RE.search(r.text)
+            if res:
+                res = res.group(0)
             units = UNITS_RE.findall(str(r.workout))
             if units:
                 units = units[0]
@@ -71,7 +74,8 @@ def scrub(session):
                             age = age,
                             height = str(convert_to_ft_in(height)),
                             weight = convert_to_lbs(weight),
-                            result = 0,
+                            result = res,
+                            score = 0,
                             units = units,
                             mods = "Rx")
             results.append(result)
@@ -80,9 +84,7 @@ def scrub(session):
 def add_results_to_db(results, session):
     session.bulk_save_objects(results)
 
-# for i in range(6,16):
-#     print (results[i][0])
-#     print ("****************")
-#     print (convert_to_ft_in(results[i][3]))
-#     print (convert_to_lbs(results[i][4]))
-#     print ("----------------")
+sess = setup_session()
+rr, r = scrub(sess)
+for i in r[0:10]:
+    print (i.comment_id, i.result)
