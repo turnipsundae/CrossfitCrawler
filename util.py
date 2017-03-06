@@ -14,13 +14,14 @@ GENDER_RE = re.compile(r"""
                           ^(?:.*?)                 # capture anything before the main bit
                           ([mf](?=\s?\/)|
                           male|female)             # strict lookup. high hit rate
+                          (?:.*)$
                           (?imx)
                        """)
 
 # GENDER_RE = re.compile(r"""([mf])\/(?i)""")    # strict lookup. high hit rate.
 
 # Age returns age
-AGE_RE = re.compile(r"\/([1-9][0-9])\/")   # strict lookup. high enough hit rate.
+AGE_RE = re.compile(r"[./]\s?([1-9][0-9])\s?[./]")   # strict lookup. high enough hit rate.
 
 # Height returns (feet, inches, all_inches, cm).
 # Expected results are
