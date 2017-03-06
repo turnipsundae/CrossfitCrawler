@@ -45,19 +45,19 @@ def scrub(session):
     results = []
     rx = session.query(Comment).filter(Comment.text.like(r"%rx%"))
     for r in rx:
-        t = GENDER_RE.findall(r.text)
+        t = GENDER_RE.search(r.text)
         if t:
-            gender = t[0][1]
-            age = AGE_RE.findall(t[0][2])
-            if age:
-                age = age[0]
-            else:
-                age = None
-            height = HEIGHT_RE.findall(t[0][2])
-            # height = convert_to_ft_in(height)
-            weight = WEIGHT_RE.findall(t[0][2])
-            # weight = convert_to_lbs(weight)
-            raw_results.append(t[0])
+            gender = t.group(1)
+            # age = AGE_RE.findall(t[0][2])
+            # if age:
+            #     age = age[0]
+            # else:
+            #     age = None
+            # height = HEIGHT_RE.findall(t[0][2])
+            # # height = convert_to_ft_in(height)
+            # weight = WEIGHT_RE.findall(t[0][2])
+            # # weight = convert_to_lbs(weight)
+            # raw_results.append(t[0])
             res = RESULTS_RE.search(r.text)
             if res:
                 res = res.group(0)
@@ -71,9 +71,9 @@ def scrub(session):
                             comment_id = r.id,
                             user_id = r.user_id,
                             gender = gender,
-                            age = age,
-                            height = str(convert_to_ft_in(height)),
-                            weight = convert_to_lbs(weight),
+                            # age = age,
+                            # height = str(convert_to_ft_in(height)),
+                            # weight = convert_to_lbs(weight),
                             result = res,
                             score = 0,
                             units = units,
@@ -87,4 +87,4 @@ def add_results_to_db(results, session):
 sess = setup_session()
 rr, r = scrub(sess)
 for i in r[0:10]:
-    print (i.comment_id, i.result)
+    print (i.comment_id, i.gender, i.result)

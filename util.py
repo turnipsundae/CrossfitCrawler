@@ -11,9 +11,9 @@ in comment.
 # GENDER_RE = re.compile(r"""^(.*)([mf])\/(.*)$(?im)""")
 
 GENDER_RE = re.compile(r"""
-                          ^(.*)                 # capture anything before the main bit
-                          ([mf])(\/            # strict lookup. high hit rate
-                          .*)$                 # remaining info
+                          ^(?:.*?)                 # capture anything before the main bit
+                          ([mf](?=\s?\/)|
+                          male|female)             # strict lookup. high hit rate
                           (?imx)
                        """)
 
