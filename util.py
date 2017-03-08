@@ -31,12 +31,10 @@ AGE_RE = re.compile(r"[./]\s?([1-9][0-9])\s?[./]")   # strict lookup. high enoug
 # HEIGHT_RE = re.compile(r"""([3-7])\'(\d{0,2})|([3-9][0-9])\"|(\d{2,3})\s?cm(?i)""")
 
 HEIGHT_RE = re.compile(r"""
-                            ([3-7])\'(\d{0,2})  # normal feet and inches, inches optional
-                            |
-                            ([3-9][0-9])\"      # or all inches. Assumes 3ft to 7ft
+                            ([3-7]\'\d{0,2})    # normal feet and inches, inches optional
                             |
                             (\d{2,3})\s?cm      # or all cms.
-                            (?ix)
+                            (?imx)
                         """)
 
 # Weight matches returns (lbs, kg).

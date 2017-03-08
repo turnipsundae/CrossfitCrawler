@@ -45,17 +45,29 @@ def scrub(session):
     results = []
     rx = session.query(Comment).filter(Comment.text.like(r"%rx%"))
     for r in rx:
-        t = GENDER_RE.search(r.text)
-        if t:
-            gender = t.group(1)
+
+        gender = GENDER_RE.search(r.text)
+        if gender:
+            gender = gender.group(1)
 
         age = AGE_RE.search(r.text)
         if age:
             age = age.group(1)
-            # height = HEIGHT_RE.findall(t[0][2])
-            # # height = convert_to_ft_in(height)
-            # weight = WEIGHT_RE.findall(t[0][2])
-            # # weight = convert_to_lbs(weight)
+
+        height = HEIGHT_RE.search(r.text)
+        if height:
+            i = height.lastindex
+            h = height.group(i)
+            if i > 1:
+                CM_PER_INCH = 2.54
+                h = divmod(int(h) / CM_PER_INCH, 12) 
+                h = "%d\'%d\"" % h
+            elif len(h) < 3:
+                h += '0"'
+            else:
+                h += '"'
+            height = h
+
         weight = WEIGHT_RE.search(r.text)
         if weight:
             i = weight.lastindex
@@ -65,29 +77,29 @@ def scrub(session):
                 conversion = 1
             weight = int(int(weight.group(i)) * conversion)
             
+        res = RESULTS_RE.search(r.text)
+        if res:
+            res = res.group(0)
 
-            # raw_results.append(t[0])
-            res = RESULTS_RE.search(r.text)
-            if res:
-                res = res.group(0)
-            units = UNITS_RE.findall(str(r.workout))
-            if units:
-                units = units[0]
-            else:
-                units = None
-            
-            result = Result(workout_id = r.workout_id,
-                            comment_id = r.id,
-                            user_id = r.user_id,
-                            gender = gender,
-                            age = age,
-                            # height = str(convert_to_ft_in(height)),
-                            weight = weight,
-                            result = res,
-                            score = 0,
-                            units = units,
-                            mods = "Rx")
-            results.append(result)
+        units = UNITS_RE.findall(str(r.workout))
+        if units:
+            units = units[0]
+        else:
+            units = None
+        
+        result = Result(workout_id = r.workout_id,
+                        comment_id = r.id,
+                        user_id = r.user_id,
+                        gender = gender,
+                        age = age,
+                        height = height,
+                        weight = weight,
+                        result = res,
+                        score = 0,
+                        units = units,
+                        mods = "rx")
+
+        results.append(result)
     return (raw_results, results)
 
 def add_results_to_db(results, session):
@@ -96,4 +108,4 @@ def add_results_to_db(results, session):
 sess = setup_session()
 rr, r = scrub(sess)
 for i in r[0:10]:
-    print (i.comment_id, i.gender, i.age, i.weight, i.result)
+    print (i.comment_id, i.gender, i.age, i.height, i.weight, i.result)
