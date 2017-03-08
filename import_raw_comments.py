@@ -52,12 +52,20 @@ def scrub(session):
         age = AGE_RE.search(r.text)
         if age:
             age = age.group(1)
-            # else:
-            #     age = None
             # height = HEIGHT_RE.findall(t[0][2])
             # # height = convert_to_ft_in(height)
             # weight = WEIGHT_RE.findall(t[0][2])
             # # weight = convert_to_lbs(weight)
+        weight = WEIGHT_RE.search(r.text)
+        if weight:
+            i = weight.lastindex
+            if i > 1:
+                conversion = 2.20462
+            else:
+                conversion = 1
+            weight = int(int(weight.group(i)) * conversion)
+            
+
             # raw_results.append(t[0])
             res = RESULTS_RE.search(r.text)
             if res:
@@ -74,7 +82,7 @@ def scrub(session):
                             gender = gender,
                             age = age,
                             # height = str(convert_to_ft_in(height)),
-                            # weight = convert_to_lbs(weight),
+                            weight = weight,
                             result = res,
                             score = 0,
                             units = units,
@@ -88,4 +96,4 @@ def add_results_to_db(results, session):
 sess = setup_session()
 rr, r = scrub(sess)
 for i in r[0:10]:
-    print (i.comment_id, i.gender, i.age, i.result)
+    print (i.comment_id, i.gender, i.age, i.weight, i.result)

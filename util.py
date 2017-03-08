@@ -46,12 +46,12 @@ HEIGHT_RE = re.compile(r"""
 # WEIGHT_RE = re.compile(r'\/([1-3][0-9][0-9])(?!c)|\/(\d{2,3})\s?kg(?i)')
 
 WEIGHT_RE = re.compile(r"""
-                            \/                  # must start with slash
+                            (?:\/\s?)           # must start with slash
                             ([1-3][0-9][0-9])   # min 100 lbs
                             (?!c)               # make sure not height measure
                             |
-                            \/(\d{2,3})\s?kg    # or 2-3 digit weight in kg
-                            (?ix)
+                            (?:\/\s?)(\d{2,3})\s?kg # or 2-3 digit weight in kg
+                            (?imx)
                         """)
 
 # Unit match returns the measure for results
