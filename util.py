@@ -58,4 +58,4 @@ UNITS_RE = re.compile(r"post.*(time|round|rep|load|total|calorie)(?i)")
 
 # Results match returns the time/rep/points
 # e.g. 4:30, 350#, 150 reps\
-RESULTS_RE = re.compile(r'^(?:.*?)(\d+:\d+)\s?(rx|min)(?im)')
+RESULTS_RE = re.compile(r'^(?:.*?)(\d+:?\d{0,2})\s?(rx|min|rep|cal|point|pts|rounds|rds)(?im)')

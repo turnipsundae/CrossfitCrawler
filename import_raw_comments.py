@@ -43,7 +43,8 @@ def convert_to_lbs(weight_param):
 def scrub(session):
     raw_results = []
     results = []
-    rx = session.query(Comment).filter(Comment.text.like(r"%rx%"))
+    # rx = session.query(Comment).filter(Comment.text.like(r"%min%"))
+    rx = session.query(Comment).all()
     for r in rx:
 
         gender = GENDER_RE.search(r.text)
@@ -107,5 +108,5 @@ def add_results_to_db(results, session):
 
 sess = setup_session()
 rr, r = scrub(sess)
-for i in r[0:10]:
+for i in r[0:100]:
     print (i.comment_id, i.gender, i.age, i.height, i.weight, i.result)
