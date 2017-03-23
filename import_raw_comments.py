@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker
 
 from util import GENDER_RE, AGE_RE, HEIGHT_RE, WEIGHT_RE, UNITS_RE, RESULTS_RE
 
+import re
+
 def setup_session():    
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -41,9 +43,7 @@ def convert_to_lbs(weight_param):
             return int(lbs.split('.')[0])
 
 def scrub(session):
-    raw_results = []
     results = []
-    # rx = session.query(Comment).filter(Comment.text.like(r"%min%"))
     rx = session.query(Comment).all()
     for r in rx:
 
@@ -79,8 +79,14 @@ def scrub(session):
             weight = int(int(weight.group(i)) * conversion)
             
         res = RESULTS_RE.search(r.text)
+        score, mods = None, None
         if res:
-            res = res.group(0)
+            res, mods = res.group(1), res.group(2)
+            if ":" in res and res.split(":")[1]:
+                m, s = res.split(":")
+                score = int(m) * 60 + int(s)
+            else:
+                score = int(re.sub("[^0-9]", "", res)) * 60
 
         units = UNITS_RE.findall(str(r.workout))
         if units:
@@ -96,17 +102,73 @@ def scrub(session):
                         height = height,
                         weight = weight,
                         result = res,
-                        score = 0,
+                        score = score,
                         units = units,
-                        mods = "rx")
+                        mods = mods)
 
         results.append(result)
-    return (raw_results, results)
+    return results
 
 def add_results_to_db(results, session):
     session.bulk_save_objects(results)
 
-sess = setup_session()
-rr, r = scrub(sess)
-for i in r[0:100]:
-    print (i.comment_id, i.gender, i.age, i.height, i.weight, i.result)
+def get_workout_min_max_avg(workout):
+    # initialize variables with first non-None type score
+
+    if workout.results:
+        
+        initialized = False
+        i, total = 0, 0
+
+        for result in workout.results:
+            if result.score is not None:
+                rMin = rMax = result.score
+                initialized = True
+                break
+
+        if initialized:
+            for result in workout.results:
+                if result.score:
+                    i += 1
+                    total += result.score
+                    if result.score < rMin:
+                        rMin = result.score
+                    elif result.score > rMax:
+                        rMax = result.score
+
+            return (rMin, rMax, total / i)
+        else:
+            return (None, None, None)
+
+def get_results_min_max_avg(results):
+    # initialize variables with first non-None type score 
+    initialized = False
+    i, total = 0, 0
+
+    for result in results:
+        if result.score is not None:
+            rMin = rMax = result.score
+            initialized = True
+            break
+
+    if initialized:
+        for result in results:
+            if result.score:
+                i += 1
+                total += result.score
+                if result.score < rMin:
+                    rMin = result.score
+                elif result.score > rMax:
+                    rMax = result.score
+
+        return (rMin, rMax, total / i)
+    else:
+        return (None, None, None)
+
+# sess = setup_session()
+# rr, r = scrub(sess)
+# add_results_to_db(r, sess)
+# for i in r[0:100]:
+#     print (i.comment_id, i.gender, i.age, i.height, i.weight, i.result)
+# fran = sess.query(Result).filter(Result.workout_id==209, Result.mods.like("%rx%"))
+# get_results_min_max_avg(fran.all())
